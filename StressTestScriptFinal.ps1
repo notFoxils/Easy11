@@ -100,8 +100,9 @@ function enableUAC {
 
 function stressTest {
 	choco install furmark heavyload hwinfo --yes
-    Add-Content -Path "C:\Program Files\HWiNFO64\HWiNFO64.INI" -Value "AutoUpdateBetaDisable=1`rAutoUpdate=0`rSensorsOnly=1"
-    Start-Process -WorkingDirectory "C:\Program Files\HWiNFO64" -FilePath HWiNFO64.EXE
+    New-Item -Path "C:\Program Files\HWiNFO64\" -Name "HWiNFO64.INI" -ItemType File
+    Add-Content -Path "C:\Program Files\HWiNFO64\HWiNFO64.INI" -Value "[Settings]`rTheme=1`rAutoUpdateBetaDisable=1`rAutoUpdate=0`rSensorsOnly=1"
+    Start-Process -WorkingDirectory "C:\Program Files\HWiNFO64\" -FilePath HWiNFO64.EXE
 	Start-Sleep -Seconds 1
 	[Clicker]::LeftClickAtPoint(1000, 600)
     Start-Sleep -Seconds 4
@@ -112,9 +113,10 @@ function stressTest {
     $wshell.AppActivate('Save As')
     $wshell.SendKeys('stressTest')
     $wshell.SendKeys('~')
-    Start-Sleep -Seconds 35
+    Start-Process -WorkingDirectory "C:\Program Files (x86)\Geeks3D\Benchmarks\FurMark\" -FilePath FurMark.exe -ArgumentList "/width=1920 /height=1080 /msaa=4 /nogui /nomenubar /noscore /run_mode=2 /disable_catalyst_warning /max_frames=-1"
+    Start-Process -WorkingDirectory "C:\Program Files\JAM Software\HeavyLoad\" -FilePath HeavyLoad.exe -ArgumentList "/start /cpu"
+    Start-Sleep -Seconds 10
     [Clicker]::LeftClickAtPoint(1000, 1000)
-    Start-Sleep -Seconds 1
 }
 
 function stopStressTest {
