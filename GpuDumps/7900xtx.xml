@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<gpuz_dump>
+  <version>2.58.0</version>
+  <card>
+    <location>8:0:0</location>
+    <cardname>AMD Radeon RX 7900 XTX</cardname>
+    <vendor>AMD/ATI</vendor>
+    <vendorid>1002</vendorid>
+    <gpuname>Navi 31</gpuname>
+    <diesize>306</diesize>
+    <transistors>57700</transistors>
+    <processsize>5</processsize>
+    <releasedate>Nov 3, 2022</releasedate>
+    <deviceid>744C</deviceid>
+    <subsysid>2422</subsysid>
+    <subvendor>PowerColor</subvendor>
+    <subvendorid>148C</subvendorid>
+    <gpurevision>C8</gpurevision>
+    <biosversion>022.001.002.025.000001</biosversion>
+    <biosuefi>1</biosuefi>
+    <businterface>PCIe x16 4.0 @ x1 3.0</businterface>
+    <directxsupport>12 (12_2)</directxsupport>
+    <memtype>GDDR6</memtype>
+    <memvendor>Samsung</memvendor>
+    <membuswidth>384</membuswidth>
+    <memsize>24576</memsize>
+    <numrops>192</numrops>
+    <numtmus>384</numtmus>
+    <numshadersvertex></numshadersvertex>
+    <numshaderspixel></numshaderspixel>
+    <numshadersunified>6144</numshadersunified>
+    <driverversion>31.0.24002.92 (Adrenalin 24.1.1) DCH / Win11 64</driverversion>
+    <whql>WHQL</whql>
+    <driverdate>Jan 11, 2024</driverdate>
+    <fillratepixel>479.8</fillratepixel>
+    <fillratetexel>959.6</fillratetexel>
+    <membandwidth>960.0</membandwidth>
+    <clockgpu>2304</clockgpu>
+    <clockmem>2500</clockmem>
+    <clockshader></clockshader>
+    <clockgpudefault>2304</clockgpudefault>
+    <clockmemdefault>2500</clockmemdefault>
+    <clockshaderdefault></clockshaderdefault>
+    <clockgpuboost>2499</clockgpuboost>
+    <clockgpuboostdefault>2499</clockgpuboostdefault>
+    <multigpuname>AMD CrossFire</multigpuname>
+    <multigpu0>Disabled</multigpu0>
+    <cuda>0</cuda>
+    <opencl>1</opencl>
+    <dxcompute>1</dxcompute>
+    <physx>0</physx>
+    <dxr>1</dxr>
+    <directml>1</directml>
+    <opengl>1</opengl>
+    <resizablebar>Enabled</resizablebar>
+  </card>
+</gpuz_dump>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<gpuz_dump>
+  <version>2.56.0</version>
+  <card>
+    <location>1:0:0</location>
+    <cardname>NVIDIA GeForce RTX 2070</cardname>
+    <vendor>NVIDIA</vendor>
+    <vendorid>10DE</vendorid>
+    <gpuname>TU106</gpuname>
+    <diesize>445</diesize>
+    <transistors>10800</transistors>
+    <processsize>12</processsize>
+    <releasedate>Aug 20, 2018</releasedate>
+    <deviceid>1F07</deviceid>
+    <subsysid>2173</subsysid>
+    <subvendor>EVGA</subvendor>
+    <subvendorid>3842</subvendorid>
+    <gpurevision>A1</gpurevision>
+    <biosversion>90.06.18.40.08</biosversion>
+    <biosuefi>1</biosuefi>
+    <businterface>PCIe x16 3.0 @ x16 3.0</businterface>
+    <directxsupport>12 (12_2)</directxsupport>
+    <memtype>GDDR6</memtype>
+    <memvendor>Samsung</memvendor>
+    <membuswidth>256</membuswidth>
+    <memsize>8192</memsize>
+    <numrops>64</numrops>
+    <numtmus>144</numtmus>
+    <numshadersvertex></numshadersvertex>
+    <numshaderspixel></numshaderspixel>
+    <numshadersunified>2304</numshadersunified>
+    <driverversion>31.0.15.5186 (NVIDIA 551.86) DCH / Win10 64</driverversion>
+    <whql>Unknown</whql>
+    <driverdate>Mar 12, 2024</driverdate>
+    <fillratepixel>110.4</fillratepixel>
+    <fillratetexel>248.4</fillratetexel>
+    <membandwidth>448.0</membandwidth>
+    <clockgpu>1410</clockgpu>
+    <clockmem>1750</clockmem>
+    <clockshader></clockshader>
+    <clockgpudefault>1410</clockgpudefault>
+    <clockmemdefault>1750</clockmemdefault>
+    <clockshaderdefault></clockshaderdefault>
+    <clockgpuboost>1725</clockgpuboost>
+    <clockgpuboostdefault>1725</clockgpuboostdefault>
+    <multigpuname>NVIDIA SLI</multigpuname>
+    <multigpu0>Disabled </multigpu0>
+    <cuda>1</cuda>
+    <opencl>1</opencl>
+    <dxcompute>1</dxcompute>
+    <physx>1</physx>
+    <dxr>1</dxr>
+    <directml>1</directml>
+    <opengl>1</opengl>
+    <resizablebar>Disabled</resizablebar>
+  </card>
+</gpuz_dump>

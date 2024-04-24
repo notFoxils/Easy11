@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<gpuz_dump>
+  <version>2.54.0</version>
+  <card>
+    <location>0:2:2</location>
+    <cardname>Intel(R) Iris(R) Xe Graphics</cardname>
+    <vendor>Intel</vendor>
+    <vendorid>8086</vendorid>
+    <gpuname>Alder Lake</gpuname>
+    <diesize>0</diesize>
+    <transistors>0</transistors>
+    <processsize>10</processsize>
+    <releasedate>Jan 4, 2022</releasedate>
+    <deviceid>46A8</deviceid>
+    <subsysid>3B3A</subsysid>
+    <subvendor>Lenovo</subvendor>
+    <subvendorid>17AA</subvendorid>
+    <gpurevision></gpurevision>
+    <biosversion></biosversion>
+    <biosuefi>1</biosuefi>
+    <businterface>N/A</businterface>
+    <directxsupport>12 (12_1)</directxsupport>
+    <memtype>DDR4</memtype>
+    <memvendor></memvendor>
+    <membuswidth>64</membuswidth>
+    <memsize>0</memsize>
+    <numrops>8</numrops>
+    <numtmus>16</numtmus>
+    <numshadersvertex></numshadersvertex>
+    <numshaderspixel></numshaderspixel>
+    <numshadersunified>80</numshadersunified>
+    <driverversion>31.0.101.4502 DCH / Win11 64</driverversion>
+    <whql>WHQL</whql>
+    <driverdate>Jul 13, 2023</driverdate>
+    <fillratepixel>17.6</fillratepixel>
+    <fillratetexel>35.1</fillratetexel>
+    <membandwidth>42.6</membandwidth>
+    <clockgpu>299</clockgpu>
+    <clockmem>2660</clockmem>
+    <clockshader></clockshader>
+    <clockgpudefault>300</clockgpudefault>
+    <clockmemdefault>2667</clockmemdefault>
+    <clockshaderdefault></clockshaderdefault>
+    <clockgpuboost>2195</clockgpuboost>
+    <clockgpuboostdefault>1200</clockgpuboostdefault>
+    <multigpuname>Multi-GPU</multigpuname>
+    <multigpu0>Disabled</multigpu0>
+    <cuda>0</cuda>
+    <opencl>1</opencl>
+    <dxcompute>1</dxcompute>
+    <physx>0</physx>
+    <dxr>0</dxr>
+    <directml>1</directml>
+    <opengl>1</opengl>
+    <resizablebar>Disabled</resizablebar>
+  </card>
+</gpuz_dump>
