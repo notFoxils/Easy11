@@ -53,7 +53,6 @@ function graphicsDrivers {
 		Write-Host "The AMD/ATI Driver Installer is working but can be easily obsoleted, until i find out a fix, or unbreakable way to download the driver, radeon gpus will not be able to install drivers automatically"
 		Write-Host "In order to access the most likely broken installer, go into the script configurator and tick the EXPERIMENTAL Driver Installer option"
 		#curl.exe -e "https://www.amd.com/en/support/download/drivers.html" https://drivers.amd.com/drivers/installer/23.40/whql/amd-software-adrenalin-edition-24.3.1-minimalsetup-240320_web.exe -o $amdDriverLocation
-		#cmd /c "cd C:\ & start /w adrenaline-web.exe"
 	} elseif ($graphics -eq 3) {
 		Write-Host "Detected GPU Vendor: NVIDIA"
 		choco install nvidia-display-driver --allowemptychecksum --yes
@@ -109,8 +108,8 @@ $stressTest = Read-Host "`r Start stress test? `n No (Will restart system): 0 `n
 if ($stressTest -eq 1) {
 	Write-Host "Starting stress test procedure, restart queued."
 	New-Item -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce -Force
-	set-location HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce
-	new-itemproperty . RunStressTestScriptAfterRestart -propertytype String -value "powershell start-process powershell C:\Windows\Setup\TheAutomationScripts\StressTestScriptFinal.ps1 -verb runas"
+	Set-Location HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce
+	New-Itemproperty . RunStressTestScriptAfterRestart -propertytype String -value "powershell start-process powershell C:\Windows\Setup\TheAutomationScripts\StressTestScriptFinal.ps1 -verb runas"
 	shutdown /r
 } elseif ($stressTest -eq 0) {
 	Write-Host "Closing script and Restarting"
