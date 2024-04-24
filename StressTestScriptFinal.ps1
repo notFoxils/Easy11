@@ -100,12 +100,11 @@ function enableUAC {
 
 function stressTest {
 	choco install furmark heavyload hwinfo --yes
-	Start-Process -NoNewWindow "C:\Windows\Setup\TheAutomationScripts\StressTestsFinal.bat"
-	Start-Sleep -Seconds 7
+    Add-Content -Path "C:\Program Files\HWiNFO64\HWiNFO64.INI" -Value "AutoUpdateBetaDisable=1`rAutoUpdate=0`rSensorsOnly=1"
+    Start-Process -WorkingDirectory "C:\Program Files\HWiNFO64" -FilePath HWiNFO64.EXE
+	Start-Sleep -Seconds 1
 	[Clicker]::LeftClickAtPoint(1000, 600)
-    Start-Sleep -Seconds 3
-    [Clicker]::LeftClickAtPoint(1100, 675)
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 4
     [Clicker]::LeftClickAtPoint(1625, 850)
     Start-Sleep -Seconds 1
     [Clicker]::LeftClickAtPoint(1050, 440)
