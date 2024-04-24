@@ -74,8 +74,8 @@ refreshenv
 Write-Host "Finished chocolatey and common software install."
 
 Write-Host "Detecting hardware."
-$gpuzName = Get-ChildItem -Path C:\ProgramData\chocolatey\lib\gpu-z\tools\* -Include *.exe -Name
-cmd /c "cd C:\ProgramData\chocolatey\lib\gpu-z\tools\ & start /w $gpuzName -dump gpuData.xml"
+$gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
+Start-Process -WorkingDirectory "C:\ProgramData\chocolatey\lib\gpu-z\tools\" -FilePath $gpuzName -ArgumentList "-dump gpuData.xml" -Wait
 [xml]$gpuData = Get-Content "C:\ProgramData\chocolatey\lib\gpu-z\tools\gpuData.xml"
 $gpuVendor = $gpuData.gpuz_dump.card.vendor
 $cpuInfo = Get-CimInstance -ClassName Win32_Processor

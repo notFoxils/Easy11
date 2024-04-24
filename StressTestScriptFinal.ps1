@@ -126,14 +126,14 @@ function stopStressTest {
 }
 
 function displayStressTest {
-    Start-Process -FilePath "C:\Program Files\Mozilla Firefox\firefox.exe" -ArgumentList '--kiosk "https://logcharts-io.pages.dev/"'
+    Start-Process -FilePath "C:\Program Files\Mozilla Firefox\firefox.exe" -ArgumentList "--kiosk 'https://logcharts-io.pages.dev/'"
     Start-Sleep 5
     [Clicker]::LeftClickAtPoint(850, 850)
-    Start-Sleep 2
+    Start-Sleep 1
     $wshell.AppActivate('File Upload')
     $wshell.SendKeys('stressTest')
     $wshell.SendKeys('~')
-    Start-Sleep 2
+    Start-Sleep 1
     [Clicker]::LeftClickAtPoint(1100, 950)
 }
 
