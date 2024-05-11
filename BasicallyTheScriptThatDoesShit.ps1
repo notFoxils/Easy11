@@ -18,7 +18,7 @@ Write-Host Elevated Terminal: "$([char]0x1b)[92m$([char]8730)"
 
 $vendor# = Read-Host "`r 1: Intel `n 2: Ryzen/AMD `n 3: X99/Xeon `n Select One (1-3)"
 $graphics# = Read-Host "`r 1: Intel Graphics `n 2: Radeon `n 3: Nvidia `n Select One (1-3)"
-$amdDriverLocation = "C:\adrenaline-web.exe"
+$amdDriverLocation = "C:\adrenaline.exe"
 $x99DriverLocation = "C:\x99.zip"
 $stressTest = 1
 #Most likely just gonna create a seperate program in java so I can brush up on my skills, and use it to edit this script, as well as generate an iso through ntlite.
@@ -46,15 +46,23 @@ function chipsetDrivers {
 
 function graphicsDrivers {
 	if ($graphics -eq 1) {
-		Write-Host "Detected GPU Vendor: Intel"
+		Write-Host "Detected GPU : Intel"
 		choco install intel-graphics-driver --allowemptychecksum --yes
 	} elseif ($graphics -eq 2) {
-		Write-Host "Detected GPU Vendor: AMD/ATI"
-		Write-Host "The AMD/ATI Driver Installer is working but can be easily obsoleted, until i find out a fix, or unbreakable way to download the driver, radeon gpus will not be able to install drivers automatically"
-		Write-Host "In order to access the most likely broken installer, go into the script configurator and tick the EXPERIMENTAL Driver Installer option"
-		#curl.exe -e "https://www.amd.com/en/support/download/drivers.html" https://drivers.amd.com/drivers/installer/23.40/whql/amd-software-adrenalin-edition-24.3.1-minimalsetup-240320_web.exe -o $amdDriverLocation
+		Write-Host "Detected GPU: AMD/ATI Non-Legacy"
+		#Big thanks to nunodxxd for making the script to grab the driver so I dont have to
+		$currentDriverLink = (curl.exe https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/main/configs/link_full.txt)
+		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $currentDriverLink -o $amdDriverLocation
+		Start-Process $amdDriverLocation -ArgumentList "-INSTALL"
+	} elseif ($graphics -eq 2) {
+		Write-Host "Detected GPU: AMD/ATI Legacy/Polaris"
+		#Big thanks to nunodxxd for making the script to grab the driver so I dont have to
+		#this one is for the Polaris series cards which dont use latest driver because they are now legacy
+		$currentDriverLink = (curl.exe https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/24.3.1/configs/link_full.txt)
+		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $currentDriverLink -o $amdDriverLocation
+		Start-Process $amdDriverLocation -ArgumentList "-INSTALL"	
 	} elseif ($graphics -eq 3) {
-		Write-Host "Detected GPU Vendor: NVIDIA"
+		Write-Host "Detected GPU: NVIDIA"
 		choco install nvidia-display-driver --allowemptychecksum --yes
 	}
 }
@@ -90,8 +98,15 @@ switch ($cpuSocket) {
 
 switch ($gpuVendor) {
 	Intel {$graphics = 1}
-	AMD/ATI {$graphics = 2}
-	NVIDIA {$graphics = 3}
+	AMD/ATI {
+		#Check for Polaris
+		if ($gpuData.gpuname -contains "Polaris") {
+			$graphics = 3
+			break
+		}
+		$graphics = 2
+	}
+	NVIDIA {$graphics = 4}
 	Default {$graphics = 0}
 }
 
