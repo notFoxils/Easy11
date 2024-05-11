@@ -16,7 +16,7 @@ Write-Host Internet Connection: "$([char]0x1b)[92m$([char]8730)"
 Write-Host Elevated Terminal: "$([char]0x1b)[92m$([char]8730)"
 #The random bullshit is a checkmark, its stupid
 
-$chipset# = Read-Host "`r 1: Intel `n 2: Ryzen/AMD `n 3: X99/Xeon `n Select One (1-3)"
+$vendor# = Read-Host "`r 1: Intel `n 2: Ryzen/AMD `n 3: X99/Xeon `n Select One (1-3)"
 $graphics# = Read-Host "`r 1: Intel Graphics `n 2: Radeon `n 3: Nvidia `n Select One (1-3)"
 $amdDriverLocation = "C:\adrenaline-web.exe"
 $x99DriverLocation = "C:\x99.zip"
@@ -25,17 +25,17 @@ $stressTest = 1
 #Scratch that, still gonna create the java program, but it just sets a few true or false variables to disable checks and input
 
 function chipsetDrivers {
-	if ($chipset -eq 1) {
-		Write-Host "Detected CPU Chipset: Intel-General"
+	if ($vendor -eq 1) {
+		Write-Host "Detected CPU Vendor: Intel"
 		choco install intel-dsa --allowemptychecksum --yes
         #Does not acutally install the chipset drivers, it just installs the driver support assistant.
 		#Im pretty sure if you restart it just automatically does it at some point but whatevs.
         #The DSA dosent have a command prompt interface, so we just have to wait as per Intel's words (https://www.intel.com/content/www/us/en/support/articles/000094418/software.html)
-	} elseif ($chipset -eq 2) {
-		Write-Host "Detected CPU Chipset: AMD-Ryzen-General"
+	} elseif ($vendor -eq 2) {
+		Write-Host "Detected CPU Vendor: AMD"
 		choco install amd-ryzen-chipset --allowemptychecksum --yes
-	} elseif ($chipset -eq 3) {
-		Write-Host "Detected CPU Chipset: Intel-X99-2011V3"
+	} elseif ($vendor -eq 3) {
+		Write-Host "Detected CPU Vendor: Intel (X99/2011V3)"
 		Invoke-WebRequest -Uri "https://drive.google.com/uc?export=download&id=13s7D4xwr-Txrhfa6Ku0CCzwE_lSh2866" -OutFile $x99DriverLocation
 		Expand-Archive $x99DriverLocation -DestinationPath "C:\x99"
 		cmd /c "cd C:\x99 & start /w SetupChipset.exe -s -norestart"
@@ -64,27 +64,28 @@ Write-Host "Starting chocolatey and common software install."
 Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-#End of chocolatey install
 refreshenv
-choco install firefox steam epicgameslauncher winget	 --ignore-checksums --yes
+choco install firefox steam epicgameslauncher winget --ignore-checksums --yes
 refreshenv
 choco install gpu-z python --yes
 refreshenv
 Write-Host "Finished chocolatey and common software install."
 
 Write-Host "Detecting hardware."
+Write-Host "Using GPU-Z to grab GPU info."
 $gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
 Start-Process -WorkingDirectory "C:\ProgramData\chocolatey\lib\gpu-z\tools\" -FilePath $gpuzName -ArgumentList "-dump gpuData.xml" -Wait
 [xml]$gpuData = Get-Content "C:\ProgramData\chocolatey\lib\gpu-z\tools\gpuData.xml"
 $gpuVendor = $gpuData.gpuz_dump.card.vendor
+Write-Host "Detecting processor socket."
 $cpuInfo = Get-CimInstance -ClassName Win32_Processor
 $cpuSocket = $cpuInfo.SocketDesignation
 
 switch ($cpuSocket) {
-	AM5 {$chipset = 2}
-	AM4 {$chipset = 2}
-	"SOCKET 0" {$chipset = 3}
-	Default {$chipset = 0}
+	AM5 {$vendor = 2}
+	AM4 {$vendor = 2}
+	"SOCKET 0" {$vendor = 3}
+	Default {$vendor = 0}
 }
 
 switch ($gpuVendor) {
@@ -94,7 +95,7 @@ switch ($gpuVendor) {
 	Default {$graphics = 0}
 }
 
-if (($chipset -eq 1) -or ($chipset -eq 2) -or ($chipset -eq 3)) {
+if (($vendor -eq 1) -or ($vendor -eq 2) -or ($vendor -eq 3)) {
 	chipsetDrivers
 }
 
@@ -109,10 +110,10 @@ if ($stressTest -eq 1) {
 	Write-Host "Starting stress test procedure, restart queued."
 	New-Item -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce -Force
 	Set-Location HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce
-	New-Itemproperty . RunStressTestScriptAfterRestart -propertytype String -value "powershell start-process powershell C:\Windows\Setup\TheAutomationScripts\StressTestScriptFinal.ps1 -verb runas"
+	New-Itemproperty . RunStressTestScriptAfterRestart -PropertyType String -Value "Powershell Start-Process Powershell C:\Windows\Setup\TheAutomationScripts\StressTestScriptFinal.ps1 -Verb runas"
 	shutdown /r
 } elseif ($stressTest -eq 0) {
-	Write-Host "Closing script and Restarting"
-	choco uninstall gpu-z python
+	Write-Host "Closing script and restarting"
+	choco uninstall gpu-z --yes
 	shutdown /r
 }
