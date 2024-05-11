@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<gpuz_dump>
+  <version>2.59.0</version>
+  <card>
+    <location>1:0:0</location>
+    <cardname>Radeon(TM) RX 480</cardname>
+    <vendor>AMD/ATI</vendor>
+    <vendorid>1002</vendorid>
+    <gpuname>Ellesmere</gpuname>
+    <diesize>232</diesize>
+    <transistors>5700</transistors>
+    <processsize>14</processsize>
+    <releasedate>Jun 29, 2016</releasedate>
+    <deviceid>67DF</deviceid>
+    <subsysid>82FC</subsysid>
+    <subvendor>HP</subvendor>
+    <subvendorid>103C</subvendorid>
+    <gpurevision>w</gpurevision>
+    <biosversion>015.050.000.001.023414</biosversion>
+    <biosuefi>1</biosuefi>
+    <businterface>PCIe x16 3.0 @ x16 3.0</businterface>
+    <directxsupport>12 (12_0)</directxsupport>
+    <memtype>GDDR5</memtype>
+    <memvendor>Samsung</memvendor>
+    <membuswidth>256</membuswidth>
+    <memsize>4096</memsize>
+    <numrops>32</numrops>
+    <numtmus>144</numtmus>
+    <numshadersvertex></numshadersvertex>
+    <numshaderspixel></numshaderspixel>
+    <numshadersunified>2304</numshadersunified>
+    <driverversion>30.0.14036.2 (Adrenalin 21.40.36) DCH / Win11 64</driverversion>
+    <whql>WHQL</whql>
+    <driverdate>Feb 15, 2022</driverdate>
+    <fillratepixel>40.5</fillratepixel>
+    <fillratetexel>182.3</fillratetexel>
+    <membandwidth>249.6</membandwidth>
+    <clockgpu>1266</clockgpu>
+    <clockmem>1950</clockmem>
+    <clockshader></clockshader>
+    <clockgpudefault>1266</clockgpudefault>
+    <clockmemdefault>1950</clockmemdefault>
+    <clockshaderdefault></clockshaderdefault>
+    <clockgpuboost></clockgpuboost>
+    <clockgpuboostdefault></clockgpuboostdefault>
+    <multigpuname>AMD CrossFire</multigpuname>
+    <multigpu0>Disabled</multigpu0>
+    <cuda>0</cuda>
+    <opencl>1</opencl>
+    <dxcompute>1</dxcompute>
+    <physx>0</physx>
+    <dxr>0</dxr>
+    <directml>1</directml>
+    <opengl>1</opengl>
+    <resizablebar>Disabled</resizablebar>
+  </card>
+</gpuz_dump>

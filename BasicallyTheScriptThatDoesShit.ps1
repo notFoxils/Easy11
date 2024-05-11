@@ -38,7 +38,7 @@ function chipsetDrivers {
 		Write-Host "Detected CPU Vendor: Intel (X99/2011V3)"
 		Invoke-WebRequest -Uri "https://drive.google.com/uc?export=download&id=13s7D4xwr-Txrhfa6Ku0CCzwE_lSh2866" -OutFile $x99DriverLocation
 		Expand-Archive $x99DriverLocation -DestinationPath "C:\x99"
-		cmd /c "cd C:\x99 & start /w SetupChipset.exe -s -norestart"
+		Start-Process -WorkingDirectory "C:\x99\SetupChipset.exe" -ArgumentList "-s -norestart" -Wait
         Remove-Item -Path "C:\x99" -Recurse
 		Remove-Item -Path $x99DriverLocation -Recurse
 	}
@@ -67,68 +67,78 @@ function graphicsDrivers {
 	}
 }
 
-#Install chocolatey (https://chocolatey.org/about)
-Write-Host "Starting chocolatey and common software install."
-Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
-Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-refreshenv
-choco install firefox steam epicgameslauncher winget --ignore-checksums --yes
-refreshenv
-choco install gpu-z python --yes
-refreshenv
-Write-Host "Finished chocolatey and common software install."
-
-Write-Host "Detecting hardware."
-Write-Host "Using GPU-Z to grab GPU info."
-$gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
-Start-Process -WorkingDirectory "C:\ProgramData\chocolatey\lib\gpu-z\tools\" -FilePath $gpuzName -ArgumentList "-dump gpuData.xml" -Wait
-[xml]$gpuData = Get-Content "C:\ProgramData\chocolatey\lib\gpu-z\tools\gpuData.xml"
-$gpuVendor = $gpuData.gpuz_dump.card.vendor
-Write-Host "Detecting processor socket."
-$cpuInfo = Get-CimInstance -ClassName Win32_Processor
-$cpuSocket = $cpuInfo.SocketDesignation
-
-switch ($cpuSocket) {
-	AM5 {$vendor = 2}
-	AM4 {$vendor = 2}
-	"SOCKET 0" {$vendor = 3}
-	Default {$vendor = 0}
+function installChocolatey {
+	#https://chocolatey.org/about
+	Write-Host "Starting chocolatey install."
+	Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+	$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
+	Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+	Write-Host "Finished chocolatey install."
+	refreshenv
 }
 
-switch ($gpuVendor) {
-	Intel {$graphics = 1}
-	AMD/ATI {
-		#Check for Polaris
-		if ($gpuData.gpuname -contains "Polaris") {
-			$graphics = 3
-			break
-		}
-		$graphics = 2
+function installSoftware {
+	Write-Host "Installing software install"
+	choco install firefox steam epicgameslauncher winget gpu-z --ignore-checksums --yes
+	Write-Host "Finished software install"
+	refreshenv
+}
+
+function installDrivers {
+	Write-Host "Detecting hardware."
+	Write-Host "Using GPU-Z to grab GPU info."
+	$gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
+	Start-Process -WorkingDirectory "C:\ProgramData\chocolatey\lib\gpu-z\tools\" -FilePath $gpuzName -ArgumentList "-dump gpuData.xml" -Wait
+	[xml]$gpuData = Get-Content "C:\ProgramData\chocolatey\lib\gpu-z\tools\gpuData.xml"
+	$gpuVendor = $gpuData.gpuz_dump.card.vendor
+	Write-Host "Detecting processor socket."
+	$cpuInfo = Get-CimInstance -ClassName Win32_Processor
+	$cpuSocket = $cpuInfo.SocketDesignation
+
+	switch ($cpuSocket) {
+		AM5 {$vendor = 2}
+		AM4 {$vendor = 2}
+		"SOCKET 0" {$vendor = 3}
+		Default {$vendor = 0}
 	}
-	NVIDIA {$graphics = 4}
-	Default {$graphics = 0}
+
+	switch ($gpuVendor) {
+		Intel {$graphics = 1}
+		AMD/ATI {
+			#Check for Polaris
+			if ($gpuData.deviceid -eq "67DF") {
+				$graphics = 3
+				break
+			}
+			$graphics = 2
+		}
+		NVIDIA {$graphics = 4}
+		Default {$graphics = 0}
+	}
+
+	if ($vendor -ne 0) {
+		chipsetDrivers
+	}
+
+	if ($graphics -ne 0) {
+		graphicsDrivers
+	}
+
+	Write-Host "Finished driver install."
 }
 
-if (($vendor -eq 1) -or ($vendor -eq 2) -or ($vendor -eq 3)) {
-	chipsetDrivers
-}
+function stressTestInit {
+	$stressTest = Read-Host "`r Start stress test? `n No (Will restart system): 0 `n Yes (Will restart and continute): 1"
 
-if (($graphics -eq 1) -or ($graphics -eq 2) -or ($graphics -eq 3)) {
-	graphicsDrivers
-}
-
-Write-Host "Finished driver install."
-$stressTest = Read-Host "`r Start stress test? `n No (Will restart system): 0 `n Yes (Will restart and continute): 1"
-
-if ($stressTest -eq 1) {
-	Write-Host "Starting stress test procedure, restart queued."
-	New-Item -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce -Force
-	Set-Location HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce
-	New-Itemproperty . RunStressTestScriptAfterRestart -PropertyType String -Value "Powershell Start-Process Powershell C:\Windows\Setup\TheAutomationScripts\StressTestScriptFinal.ps1 -Verb runas"
-	shutdown /r
-} elseif ($stressTest -eq 0) {
-	Write-Host "Closing script and restarting"
-	choco uninstall gpu-z --yes
-	shutdown /r
+	if ($stressTest -eq 1) {
+		Write-Host "Starting stress test procedure, restart queued."
+		New-Item -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce -Force
+		Set-Location HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce
+		New-Itemproperty . RunStressTestScriptAfterRestart -PropertyType String -Value "Powershell Start-Process Powershell C:\Windows\Setup\TheAutomationScripts\StressTestScriptFinal.ps1 -Verb runas"
+		shutdown /r
+	} elseif ($stressTest -eq 0) {
+		Write-Host "Closing script and restarting"
+		choco uninstall gpu-z --yes
+		shutdown /r
+	}
 }
