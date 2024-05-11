@@ -63,7 +63,7 @@ function chipsetDrivers($vendor) {
 		choco install amd-ryzen-chipset --yes
 	} elseif ($vendor -eq 3) {
 		$x99DriverLocation = "C:\x99.zip"
-		
+
 		Write-Host "Detected CPU Vendor: Intel (X99/2011V3)"
 
 		Invoke-WebRequest -Uri "https://drive.google.com/uc?export=download&id=13s7D4xwr-Txrhfa6Ku0CCzwE_lSh2866" -OutFile $x99DriverLocation
