@@ -18,8 +18,6 @@ Write-Host Elevated Terminal: "$([char]0x1b)[92m$([char]8730)"
 
 $predefinedCPUVendor
 $predefinedGPUVendor
-$amdDriverLocation = "C:\adrenaline.exe"
-$x99DriverLocation = "C:\x99.zip"
 
 function installChocolatey {
 	#https://chocolatey.org/about
@@ -27,7 +25,7 @@ function installChocolatey {
 
 	#Following is from https://docs.chocolatey.org/en-us/choco/setup
 	Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-	
+
 	#This imports the refreshenv command so that choco can initialize without relaunching powershell
 	$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
 	Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
@@ -64,6 +62,8 @@ function chipsetDrivers($vendor) {
 
 		choco install amd-ryzen-chipset --yes
 	} elseif ($vendor -eq 3) {
+		$x99DriverLocation = "C:\x99.zip"
+		
 		Write-Host "Detected CPU Vendor: Intel (X99/2011V3)"
 
 		Invoke-WebRequest -Uri "https://drive.google.com/uc?export=download&id=13s7D4xwr-Txrhfa6Ku0CCzwE_lSh2866" -OutFile $x99DriverLocation
@@ -88,6 +88,7 @@ function graphicsDrivers($graphics) {
 	} elseif ($graphics -eq 2) {
 		#Big thanks to nunodxxd for making the script to grab the driver so I dont have to
 		$AdrenalineDriverLink = (curl.exe "https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/main/configs/link_full.txt")
+		$amdDriverLocation = "C:\adrenaline.exe"
 
 		Write-Host "Detected GPU: AMD/ATI Non-Legacy"
 
