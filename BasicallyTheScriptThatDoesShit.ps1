@@ -16,15 +16,35 @@ Write-Host Internet Connection: "$([char]0x1b)[92m$([char]8730)"
 Write-Host Elevated Terminal: "$([char]0x1b)[92m$([char]8730)"
 #The random bullshit is a checkmark, its stupid
 
-$vendor# = Read-Host "`r 1: Intel `n 2: Ryzen/AMD `n 3: X99/Xeon `n Select One (1-3)"
-$graphics# = Read-Host "`r 1: Intel Graphics `n 2: Radeon `n 3: Nvidia `n Select One (1-3)"
+$predefinedCPUVendor
+$predefinedGPUVendor
+$vendor
+$graphics
 $amdDriverLocation = "C:\adrenaline.exe"
 $x99DriverLocation = "C:\x99.zip"
-$stressTest = 1
-#Most likely just gonna create a seperate program in java so I can brush up on my skills, and use it to edit this script, as well as generate an iso through ntlite.
-#Scratch that, still gonna create the java program, but it just sets a few true or false variables to disable checks and input
+
+function installChocolatey {
+	#https://chocolatey.org/about
+	Write-Host "Starting chocolatey install."
+	Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+	$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
+	Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+	Write-Host "Finished chocolatey install."
+	refreshenv
+	installSoftware
+}
+
+function installSoftware {
+	Write-Host "Installing software install"
+	choco install firefox steam epicgameslauncher winget gpu-z --ignore-checksums --yes
+	Write-Host "Finished software install"
+	refreshenv
+	installDrivers
+}
 
 function chipsetDrivers {
+	Write-Host "Starting CPU chipset installation."
+
 	if ($vendor -eq 1) {
 		Write-Host "Detected CPU Vendor: Intel"
 		choco install intel-dsa --allowemptychecksum --yes
@@ -42,52 +62,47 @@ function chipsetDrivers {
         Remove-Item -Path "C:\x99" -Recurse
 		Remove-Item -Path $x99DriverLocation -Recurse
 	}
+
+	Write-Host "Finished CPU chipset install process, moving to GPU driver installation."
 }
 
 function graphicsDrivers {
+	Write-Host "Starting GPU driver installation."
+
 	if ($graphics -eq 1) {
 		Write-Host "Detected GPU : Intel"
 		choco install intel-graphics-driver --allowemptychecksum --yes
 	} elseif ($graphics -eq 2) {
 		Write-Host "Detected GPU: AMD/ATI Non-Legacy"
 		#Big thanks to nunodxxd for making the script to grab the driver so I dont have to
-		$currentDriverLink = (curl.exe https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/main/configs/link_full.txt)
-		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $currentDriverLink -o $amdDriverLocation
+		$currentAMDDriverLink = (curl.exe "https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/main/configs/link_full.txt")
+		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $currentAMDDriverLink -o $amdDriverLocation
 		Start-Process $amdDriverLocation -ArgumentList "-INSTALL"
 	} elseif ($graphics -eq 2) {
 		Write-Host "Detected GPU: AMD/ATI Legacy/Polaris"
 		#Big thanks to nunodxxd for making the script to grab the driver so I dont have to
 		#this one is for the Polaris series cards which dont use latest driver because they are now legacy
-		$currentDriverLink = (curl.exe https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/24.3.1/configs/link_full.txt)
-		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $currentDriverLink -o $amdDriverLocation
+		$currentAMDDriverLink = (curl.exe https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/24.3.1/configs/link_full.txt)
+		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $currentAMDDriverLink -o $amdDriverLocation
 		Start-Process $amdDriverLocation -ArgumentList "-INSTALL"	
 	} elseif ($graphics -eq 3) {
 		Write-Host "Detected GPU: NVIDIA"
 		choco install nvidia-display-driver --allowemptychecksum --yes
+	} elseif ($graphics -eq 0) {
+		Write-Host "GPU vendor cannot be detected or vendor detection has been skipped."
 	}
-}
 
-function installChocolatey {
-	#https://chocolatey.org/about
-	Write-Host "Starting chocolatey install."
-	Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-	$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
-	Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-	Write-Host "Finished chocolatey install."
-	refreshenv
-}
-
-function installSoftware {
-	Write-Host "Installing software install"
-	choco install firefox steam epicgameslauncher winget gpu-z --ignore-checksums --yes
-	Write-Host "Finished software install"
-	refreshenv
+	Write-Host "Finished GPU driver install process, moving to stress testing initialization."
 }
 
 function installDrivers {
+	$gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
+	$gpuData
+	$gpuVendor
+	$cpuInfo
+	$cpuSocket
 	Write-Host "Detecting hardware."
 	Write-Host "Using GPU-Z to grab GPU info."
-	$gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
 	Start-Process -WorkingDirectory "C:\ProgramData\chocolatey\lib\gpu-z\tools\" -FilePath $gpuzName -ArgumentList "-dump gpuData.xml" -Wait
 	[xml]$gpuData = Get-Content "C:\ProgramData\chocolatey\lib\gpu-z\tools\gpuData.xml"
 	$gpuVendor = $gpuData.gpuz_dump.card.vendor
@@ -116,13 +131,8 @@ function installDrivers {
 		Default {$graphics = 0}
 	}
 
-	if ($vendor -ne 0) {
-		chipsetDrivers
-	}
-
-	if ($graphics -ne 0) {
-		graphicsDrivers
-	}
+	chipsetDrivers
+	graphicsDrivers
 
 	Write-Host "Finished driver install."
 }
