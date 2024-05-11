@@ -4,9 +4,9 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 if (-NOT (Test-Connection -ComputerName www.archlinux.org -Quiet)) {
-	Write-Host "No internet connection detected, retry after connecting."
+	Write-Host "No internet connection detected, retry after connecting"
 	Write-Host "Note: Ethernet is recommended for setup, as there is no trace of your WiFi password or other sensitive information! (https://pureinfotech.com/share-internet-connection-windows-10/)"
-	Write-Host "Pressing enter will reinitiate the script."
+	Write-Host "Pressing enter will reinitiate the script"
     pause
 	Start-Process Powershell -Verb runAs
 	Break
@@ -21,7 +21,7 @@ $predefinedGPUVendor
 
 function installChocolatey {
 	#https://chocolatey.org/about
-	Write-Host "Starting chocolatey install."
+	Write-Host "Starting chocolatey install"
 
 	#Following is from https://docs.chocolatey.org/en-us/choco/setup
 	Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
@@ -30,7 +30,7 @@ function installChocolatey {
 	$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
 	Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 
-	Write-Host "Finished chocolatey install."
+	Write-Host "Finished chocolatey install"
 	refreshenv
 
 	installSoftware
@@ -48,7 +48,7 @@ function installSoftware {
 }
 
 function chipsetDrivers($vendor) {
-	Write-Host "Starting CPU chipset installation."
+	Write-Host "Starting CPU chipset installation"
 
 	if ($vendor -eq 1) {
 		Write-Host "Detected CPU Vendor: Intel"
@@ -75,11 +75,11 @@ function chipsetDrivers($vendor) {
 		Remove-Item -Path $x99DriverLocation -Recurse
 	}
 
-	Write-Host "Finished CPU chipset install process, moving to GPU driver installation."
+	Write-Host "Finished CPU chipset install process, moving to GPU driver installation"
 }
 
 function graphicsDrivers($graphics) {
-	Write-Host "Starting GPU driver installation."
+	Write-Host "Starting GPU driver installation"
 
 	if ($graphics -eq 1) {
 		Write-Host "Detected GPU : Intel"
@@ -94,7 +94,7 @@ function graphicsDrivers($graphics) {
 
 		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $AdrenalineDriverLink -o $amdDriverLocation
 		Start-Process $amdDriverLocation -ArgumentList "-INSTALL"
-	} elseif ($graphics -eq 2) {
+	} elseif ($graphics -eq 3) {
 		#Big thanks to nunodxxd for making the script to grab the driver so I dont have to
 		#This one is for the Polaris series cards which dont use latest driver because they are now legacy
 		$AdrenalineDriverLink = (curl.exe "https://raw.githubusercontent.com/nunodxxd/AMD-Software-Adrenalin/24.3.1/configs/link_full.txt")
@@ -103,18 +103,18 @@ function graphicsDrivers($graphics) {
 
 		curl.exe -e "https://www.amd.com/en/support/download/drivers.html" $AdrenalineDriverLink -o $amdDriverLocation
 		Start-Process $amdDriverLocation -ArgumentList "-INSTALL"	
-	} elseif ($graphics -eq 3) {
+	} elseif ($graphics -eq 4) {
 		Write-Host "Detected GPU: NVIDIA"
 
 		choco install nvidia-display-driver --yes
 	} elseif ($graphics -eq 0) {
-		Write-Host "GPU vendor cannot be detected or vendor detection has been skipped."
+		Write-Host "GPU vendor cannot be detected or vendor detection has been skipped"
 	}
 
-	Write-Host "Finished GPU driver install process, moving to stress testing initialization."
+	Write-Host "Finished GPU driver install process, moving to stress testing initialization"
 }
 
-function installDrivers {
+function recognizeHardware {
 	$gpuzName = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\gpu-z\tools\*" -Include "*.exe" -Name
 	$gpuData
 	$gpuVendor
@@ -123,14 +123,14 @@ function installDrivers {
 	$graphics
 	$vendor
 
-	Write-Host "Detecting hardware."
-	Write-Host "Using GPU-Z to grab GPU info."
+	Write-Host "Detecting hardware"
+	Write-Host "Using GPU-Z to grab GPU info"
 
 	Start-Process -WorkingDirectory "C:\ProgramData\chocolatey\lib\gpu-z\tools\" -FilePath $gpuzName -ArgumentList "-dump gpuData.xml" -Wait
 	[xml]$gpuData = Get-Content "C:\ProgramData\chocolatey\lib\gpu-z\tools\gpuData.xml"
 	$gpuVendor = $gpuData.gpuz_dump.card.vendor
 
-	Write-Host "Detecting processor socket."
+	Write-Host "Detecting processor socket"
 
 	$cpuInfo = Get-CimInstance -ClassName Win32_Processor
 	$cpuSocket = $cpuInfo.SocketDesignation
@@ -158,19 +158,16 @@ function installDrivers {
 		Default {$graphics = 0}
 	}
 
-	chipsetDrivers($vendor)
-	graphicsDrivers($graphics)
+	Write-Host "Finished driver install"
 
-	Write-Host "Finished driver install."
-
-	stressTestInit
+	return $vendor, $graphics
 }
 
 function stressTestInit {
-	$stressTest = Read-Host "`r Start stress test? `n No (Will restart system): 0 `n Yes (Will restart and continute): 1"
+	$stressTest = Read-Host "`rStart stress test? `nNo (Will restart system): 0 `nYes (Will restart and continute): 1`n"
 
 	if ($stressTest -eq 1) {
-		Write-Host "Starting stress test procedure, restart queued."
+		Write-Host "Starting stress test procedure, restart queued"
 
 		New-Item -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce -Force
 		Set-Location HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce
@@ -185,3 +182,15 @@ function stressTestInit {
 		shutdown /r
 	}
 }
+
+
+function main {
+	installChocolatey
+	installSoftware
+	$graphicsAndChipsetDetection = recognizeHardware
+	chipsetDrivers($graphicsAndChipsetDetection[0])
+	graphicsDrivers($graphicsAndChipsetDetection[1])
+	stressTestInit
+}
+
+main
