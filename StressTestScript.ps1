@@ -117,6 +117,7 @@ function stressTest {
     Start-Process -WorkingDirectory "C:\Program Files\JAM Software\HeavyLoad\" -FilePath HeavyLoad.exe -ArgumentList "/start /cpu"
     Start-Sleep -Seconds 10
     [Clicker]::LeftClickAtPoint(1000, 1000)
+	[System.Windows.MessageBox]::Show("Finish stress test? `n(Closing will still stop the test) `n(Will open firefox kiosk window [ctrl + w to close])", "Finish Stress Test?", "Ok", "Information")
 }
 
 function stopStressTest {
@@ -139,7 +140,6 @@ function displayStressTest {
 
 
 stressTest
-[System.Windows.MessageBox]::Show("Finish stress test? `n(Closing will still stop the test) `n(Will open firefox kiosk window [ctrl + w to close])", "Finish Stress Test?", "Ok", "Information")
 stopStressTest
 displayStressTest
 enableUAC
