@@ -1,4 +1,4 @@
-1: Check the whole system for mistakes
+1: Testing, lots and lots of testing with various hardware configs.
 2: Java or C# seperate program so that people dont have to edit the scary code (disable enable autodetect, etc)
 3: Test the java/C# program
 4: Create github repo for said program
