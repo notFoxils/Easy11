@@ -1,5 +1,6 @@
 if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Start-Process powershell -Verb runAs
+	$arguments = "& '" +$myinvocation.mycommand.definition + "'"
+	Start-Process powershell -Verb runAs -ArgumentList $arguments
 	Break
 }
 
@@ -18,10 +19,11 @@ Write-Host Elevated Terminal: "$([char]0x1b)[92m$([char]8730)"
 
 $predefinedCPUVendor
 $predefinedGPUVendor
+$debug = $false
 
 function installChocolatey {
 	#https://chocolatey.org/about
-	Write-Host "Starting chocolatey install"
+	Write-Host "Starting chocolatey install" 
 
 	#Following is from https://docs.chocolatey.org/en-us/choco/setup
 	Set-ExecutionPolicy Unrestricted; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
@@ -42,15 +44,19 @@ function installSoftware {
 	choco install firefox steam epicgameslauncher winget gpu-z --ignore-checksums --yes
 
 	Write-Host "Finished software install"
-	refreshenv
-
-	installDrivers
 }
 
-function chipsetDrivers($vendor) {
+function chipsetDrivers {
+
+	param (
+        $vendor
+    )
+
 	Write-Host "Starting CPU chipset installation"
 
-	if ($vendor -eq 1) {
+	if ($debug) {
+		Write-Host $vendor
+	} elseif ($vendor -eq 1) {
 		Write-Host "Detected CPU Vendor: Intel"
 
 		choco install intel-dsa --yes
@@ -73,15 +79,24 @@ function chipsetDrivers($vendor) {
 
         Remove-Item -Path "C:\x99" -Recurse
 		Remove-Item -Path $x99DriverLocation -Recurse
+	} else {
+		Write-Host "Vendor not found"
 	}
 
 	Write-Host "Finished CPU chipset install process, moving to GPU driver installation"
 }
 
-function graphicsDrivers($graphics) {
+function graphicsDrivers {
+
+	param (
+        $graphics
+    )
+
 	Write-Host "Starting GPU driver installation"
 
-	if ($graphics -eq 1) {
+	if ($debug) {
+		Write-Host $graphics
+	} elseif ($graphics -eq 1) {
 		Write-Host "Detected GPU : Intel"
 
 		choco install intel-graphics-driver --yes
@@ -107,7 +122,7 @@ function graphicsDrivers($graphics) {
 		Write-Host "Detected GPU: NVIDIA"
 
 		choco install nvidia-display-driver --yes
-	} elseif ($graphics -eq 0) {
+	} else {
 		Write-Host "GPU vendor cannot be detected or vendor detection has been skipped"
 	}
 
@@ -146,8 +161,8 @@ function recognizeHardware {
 		Intel {$graphics = 1}
 		AMD/ATI {
 			#Check for Polaris
-			#Uses the PCI device id which matches from the 470 to 580 and the in betweens
-			if ($gpuData.deviceid -eq "67DF") {
+			#Uses the PCI device id which matches from the 450 to 590 and the in betweens
+			if ($gpuData.deviceid -eq "67DF" -or $gpuData.deviceid -eq "67EF" -or $gpuData.deviceid -eq "699F" -or $gpuData.deviceid -eq "67FF") {
 				$graphics = 3
 				break
 			}
@@ -159,8 +174,9 @@ function recognizeHardware {
 	}
 
 	Write-Host "Finished driver install"
+	$array = $vendor, $graphics
 
-	return $vendor, $graphics
+	return $array
 }
 
 function stressTestInit {
@@ -188,8 +204,8 @@ function main {
 	installChocolatey
 	installSoftware
 	$graphicsAndChipsetDetection = recognizeHardware
-	chipsetDrivers($graphicsAndChipsetDetection[0])
-	graphicsDrivers($graphicsAndChipsetDetection[1])
+	chipsetDrivers -vendor $graphicsAndChipsetDetection[6] #dark evil wizard magic adds 6 " " to the array id rather not question it
+	graphicsDrivers -graphics $graphicsAndChipsetDetection[7]
 	stressTestInit
 }
 
